@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
@@ -48,15 +47,15 @@ func TestCreateAsset(t *testing.T) {
 	transactionContext.GetStubReturns(chaincodeStub)
 
 	assetTransfer := chaincode.SmartContract{}
-	err := assetTransfer.CreateAsset(transactionContext, "", "", 0, "", 0)
+	err := assetTransfer.CreateAsset(transactionContext, "", "", "", "")
 	require.NoError(t, err)
 
 	chaincodeStub.GetStateReturns([]byte{}, nil)
-	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", 0, "", 0)
+	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", "", "")
 	require.EqualError(t, err, "the asset asset1 already exists")
 
 	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
-	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", 0, "", 0)
+	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", "", "")
 	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
 }
 
@@ -96,15 +95,15 @@ func TestUpdateAsset(t *testing.T) {
 
 	chaincodeStub.GetStateReturns(bytes, nil)
 	assetTransfer := chaincode.SmartContract{}
-	err = assetTransfer.UpdateAsset(transactionContext, "", "", 0, "", 0)
+	err = assetTransfer.UpdateAsset(transactionContext, "", "", "", "")
 	require.NoError(t, err)
 
 	chaincodeStub.GetStateReturns(nil, nil)
-	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "", 0, "", 0)
+	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "","", "")
 	require.EqualError(t, err, "the asset asset1 does not exist")
 
 	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
-	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "", 0, "", 0)
+	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "","","")
 	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
 }
 
@@ -129,25 +128,6 @@ func TestDeleteAsset(t *testing.T) {
 
 	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
 	err = assetTransfer.DeleteAsset(transactionContext, "")
-	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
-}
-
-func TestTransferAsset(t *testing.T) {
-	chaincodeStub := &mocks.ChaincodeStub{}
-	transactionContext := &mocks.TransactionContext{}
-	transactionContext.GetStubReturns(chaincodeStub)
-
-	asset := &chaincode.Asset{ID: "asset1"}
-	bytes, err := json.Marshal(asset)
-	require.NoError(t, err)
-
-	chaincodeStub.GetStateReturns(bytes, nil)
-	assetTransfer := chaincode.SmartContract{}
-	_, err = assetTransfer.TransferAsset(transactionContext, "", "")
-	require.NoError(t, err)
-
-	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
-	_, err = assetTransfer.TransferAsset(transactionContext, "", "")
 	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
 }
 

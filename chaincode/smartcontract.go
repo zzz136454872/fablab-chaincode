@@ -155,29 +155,6 @@ func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface,
 	return assetJSON != nil, nil
 }
 
-// // TransferAsset updates the owner field of asset with given id in world state, and returns the old owner.
-// func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newOwner string) (string, error) {
-// 	asset, err := s.ReadAsset(ctx, id)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 
-// 	oldOwner := asset.Owner
-// 	asset.Owner = newOwner
-// 
-// 	assetJSON, err := json.Marshal(asset)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 
-// 	err = ctx.GetStub().PutState(id, assetJSON)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 
-// 	return oldOwner, nil
-// }
-
 // GetAllAssets returns all assets found in world state
 func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
 	// range query with empty string for startKey and endKey does an
