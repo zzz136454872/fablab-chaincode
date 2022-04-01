@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric-protos-go/ledger/queryresult"
@@ -36,9 +37,11 @@ func TestInitLedger(t *testing.T) {
 	err := assetTransfer.InitLedger(transactionContext)
 	require.NoError(t, err)
 
-	chaincodeStub.PutStateReturns(fmt.Errorf("failed inserting key"))
+	errMsg := "failed inserting key"
+	chaincodeStub.PutStateReturns(fmt.Errorf(errMsg))
 	err = assetTransfer.InitLedger(transactionContext)
-	require.EqualError(t, err, "failed to put to world state. failed inserting key")
+	require.NotNil(t, err, "should throw an err")
+	require.Contains(t, err.Error(), errMsg, "should include the original error message")
 }
 
 func TestCreateAsset(t *testing.T) {
@@ -52,11 +55,14 @@ func TestCreateAsset(t *testing.T) {
 
 	chaincodeStub.GetStateReturns([]byte{}, nil)
 	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", "", "")
-	require.EqualError(t, err, "the asset asset1 already exists")
+	require.NotNil(t, err, "should be the error asset1 exists")
+	require.Contains(t, err.Error(), "asset1", "should include the original error message")
 
-	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
+	errMsg := "failed inserting key"
+	chaincodeStub.GetStateReturns(nil, fmt.Errorf(errMsg))
 	err = assetTransfer.CreateAsset(transactionContext, "asset1", "", "", "")
-	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
+	require.NotNil(t, err, "should be the error failed to read")
+	require.Contains(t, err.Error(), errMsg, "should include the original error message")
 }
 
 func TestReadAsset(t *testing.T) {
@@ -74,13 +80,15 @@ func TestReadAsset(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expectedAsset, asset)
 
-	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
+	errMsg := "unable to retrieve asset"
+	chaincodeStub.GetStateReturns(nil, fmt.Errorf(errMsg))
 	_, err = assetTransfer.ReadAsset(transactionContext, "")
-	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
+	require.NotNil(t, err, "should be the error failed to read")
+	require.Contains(t, err.Error(), errMsg, "should include the original error message")
 
 	chaincodeStub.GetStateReturns(nil, nil)
 	asset, err = assetTransfer.ReadAsset(transactionContext, "asset1")
-	require.EqualError(t, err, "the asset asset1 does not exist")
+	require.NotNil(t, err, "should be the error asset1 does not exists")
 	require.Nil(t, asset)
 }
 
@@ -99,12 +107,14 @@ func TestUpdateAsset(t *testing.T) {
 	require.NoError(t, err)
 
 	chaincodeStub.GetStateReturns(nil, nil)
-	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "","", "")
-	require.EqualError(t, err, "the asset asset1 does not exist")
+	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "", "", "")
+	require.NotNil(t, err, "should be the error asset1 does not exists")
 
-	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
-	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "","","")
-	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
+	errMsg := "unable to retrieve asset"
+	chaincodeStub.GetStateReturns(nil, fmt.Errorf(errMsg))
+	err = assetTransfer.UpdateAsset(transactionContext, "asset1", "", "", "")
+	require.NotNil(t, err, "should be the error failed to read")
+	require.Contains(t, err.Error(), errMsg, "should include the original error message")
 }
 
 func TestDeleteAsset(t *testing.T) {
@@ -124,11 +134,13 @@ func TestDeleteAsset(t *testing.T) {
 
 	chaincodeStub.GetStateReturns(nil, nil)
 	err = assetTransfer.DeleteAsset(transactionContext, "asset1")
-	require.EqualError(t, err, "the asset asset1 does not exist")
+	require.NotNil(t, err, "should be the error asset1 does not exists")
 
-	chaincodeStub.GetStateReturns(nil, fmt.Errorf("unable to retrieve asset"))
+	errMsg := "unable to retrieve asset"
+	chaincodeStub.GetStateReturns(nil, fmt.Errorf(errMsg))
 	err = assetTransfer.DeleteAsset(transactionContext, "")
-	require.EqualError(t, err, "failed to read from world state: unable to retrieve asset")
+	require.NotNil(t, err, "should be the error failed to read")
+	require.Contains(t, err.Error(), errMsg, "should include the original error message")
 }
 
 func TestGetAllAssets(t *testing.T) {
@@ -154,11 +166,11 @@ func TestGetAllAssets(t *testing.T) {
 	iterator.HasNextReturns(true)
 	iterator.NextReturns(nil, fmt.Errorf("failed retrieving next item"))
 	assets, err = assetTransfer.GetAllAssets(transactionContext)
-	require.EqualError(t, err, "failed retrieving next item")
+	require.Contains(t, err.Error(), "failed retrieving next item", "should failed retrieving next item")
 	require.Nil(t, assets)
 
 	chaincodeStub.GetStateByRangeReturns(nil, fmt.Errorf("failed retrieving all assets"))
 	assets, err = assetTransfer.GetAllAssets(transactionContext)
-	require.EqualError(t, err, "failed retrieving all assets")
+	require.Contains(t, err.Error(), "failed retrieving all assets", "should failed retrieving all assets")
 	require.Nil(t, assets)
 }
