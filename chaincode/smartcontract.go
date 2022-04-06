@@ -16,12 +16,6 @@ type SmartContract struct {
 //Insert struct field in alphabetic order => to achieve determinism accross languages
 // golang keeps the order when marshal to json but doesn't order automatically
 type Asset struct {
-	// AppraisedValue int    `json:"AppraisedValue"`
-	// Color          string `json:"Color"`
-	// ID             string `json:"ID"`
-	// Owner          string `json:"Owner"`
-	// Size           int    `json:"Size"`
-
 	Count          string `json:"Count"`
 	ID             string `json:"ID"`
 	Name           string `json:"Name"`
@@ -31,11 +25,11 @@ type Asset struct {
 // InitLedger adds a base set of assets to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	assets := []Asset{
-		{ID: "asset1", Name:"table", Count: "10", Owner:"xiaoming"},
-		{ID: "asset2", Name:"tv", Count: "1", Owner:"mingxiao"},
-		{ID: "asset3", Name:"phone", Count: "100", Owner:"xiaming"},
-		{ID: "asset4", Name:"mobile", Count: "1000", Owner:"xiaomin"},
-		{ID: "asset5", Name:"water", Count: "10000", Owner:"xiami"},
+		{ID: "M0001", Name:"钢板", Count: "100", Owner:"王小米"},
+		{ID: "M0002", Name:"铝合金", Count: "10", Owner:"王小米"},
+		{ID: "M0003", Name:"砖块", Count: "10000", Owner:"林小明"},
+		{ID: "M0011", Name:"钢筋", Count: "2000", Owner:"林小明"},
+		{ID: "M0012", Name:"工业酒精", Count: "100", Owner:"王小米"},
 	}
 
 	for _, asset := range assets {
@@ -64,12 +58,6 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 	}
 
 	asset := Asset{
-		// ID:             id,
-		// Color:          color,
-		// Size:           size,
-		// Owner:          owner,
-		// AppraisedValue: appraisedValue,
-
 		Count  :count,
 		ID     :id,
 		Name   :name,
@@ -118,11 +106,6 @@ func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface,
 		ID     :id,
 		Name   :name,
 		Owner  :owner,
-		// ID:             id,
-		// Color:          color,
-		// Size:           size,
-		// Owner:          owner,
-		// AppraisedValue: appraisedValue,
 	}
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {
